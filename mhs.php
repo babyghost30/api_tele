@@ -147,6 +147,6 @@
 	}
 	while (true) {
 	    notif_mhs();
-	    sleep(1);
+	    sleep(1800);
 	}
 ?>
