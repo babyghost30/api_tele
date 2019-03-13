@@ -1,93 +1,88 @@
 <?php 
+	// date_default_timezone_set('Asia/Jakarta');
 	function notifikasi_dsn(){
 		$token = "648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8";
-		$url = "https://api.telegram.org/bot".$token;
+		$urls = "https://api.telegram.org/bot".$token;
 		$update = json_decode(file_get_contents('php://input') ,true);
 
 		require 'conf/conn.php';
 		include "conf/odoo_conf.php";
 
-			$hari = date('l');
+			$hari = date("D");
 			$dayList = array(
-				'Sunday' => '7',
-				'Monday' => '1',
-				'Tuesday' => '2',
-				'Wednesday' => '3',
-				'Thursday' => '4',
-				'Friday' => '5',
-				'Saturday' => '6'
+				'Sun' => '7',
+				'Mon' => '1',
+				'Tue' => '2',
+				'Wed' => '3',
+				'Thu' => '4',
+				'Fri' => '5',
+				'Sat' => '6'
 			);
+			$day_target = $dayList[$hari];
 
-		$schedule_dsn = $models->execute_kw($database,
+			date_default_timezone_set('Asia/Jakarta');
+			$date = date('H:i');
+			$hari = date_create($date);
+			$jam = date_add($hari, date_interval_create_from_date_string('30 minutes'));
+			$jam_acuan = date_format($jam, 'H:i');
+			
+			$jadwal_dsn = $models->execute_kw($database,
 											 $uid,
 											 $password,
 											'udin.schedule.schedule_slot',
 											'search_read',
 											 array(
 													array(	
-														  array('day_slot','=',$dayList[$hari]),
+														  array('day_slot','=',$day_target),
 														  array('batch_code','=','20181'),
 														 )
 												  )
 										   );
-		// var_dump($schedule_dsn);
-		foreach ($schedule_dsn as $schedule_dsn) {
-					$time = strval($schedule_dsn['hour_start']);
-					$date = date('H:i');
-					$hari = date_create($date);
-					$jam = date_add($hari, date_interval_create_from_date_string('30 minutes'));
-					$jam_acuan = date_format($jam, 'H:i');
-
-					$parts = explode(':', $jam_acuan);
-					$acuan = number_format($parts[0] + (($parts[1]/60)*100 / 100), 4);
-
-					if($acuan == $time){
-						$dsn = $models->execute_kw($database,
+		// var_dump($jadwal_dsn);
+		foreach ($jadwal_dsn as $key => $m) {
+			# code...
+			$time = $m['hour_start'];
+			$krm_id = $m['krm_id'][1];
+		 	// $id_dsn = $m['id'];
+			$detail = $m['name'];
+			$course = $m['matakuliah'];
+			$hourFraction = $time - (int)$time;
+			$minutes = $hourFraction * 60;
+			$hours = (int)$time;
+			$menit = (int)$minutes;
+			$time_course = $hours.":".$menit;
+			$time_try = $time_course;
+			$dsn_npp = $models->execute_kw($database,
 											 $uid,
 											 $password,
-											'udin.schedule.schedule_slot',
+											'udin.schedule.krm',
 											'search_read',
 											 array(
 													array(	
-														  array('day_slot','=',$dayList[$hari]),
-														  array('hour_start','=',$time),
+														  array('name','=',$krm_id),
 														 )
 												  )
 										   );
-						foreach ($dsn as $dsn) {
-							# code...
-							$krm_id = $dsn['krm_id'][1];
-							$days = $dsn['name'];
-							$course = $dsn['matakuliah'];
-							$message = "Ada Jadwal pada ".$days." dengan Mata Kuliah ".$course;
-
-							$get_id_tele = $models->execute_kw($database,$uid,$password,
-																					'udin.lecturer.lecturer',
-																					'search_read',
-																					array(
-																							array(
-																									array('full_name','ilike',$krm_id),
-																								)
-																						)
-																					);
-							foreach ($get_id_tele as $id_tele) {
-								# code...
-								$npp = $id_tele['npp'];
-								$q = mysqli_query($con,"select * from user where nim='$npp'");
-						        	foreach ($q as $mhs) {
-						        		$user = $mhs['id_user'];
-						        		file_get_contents($url."/sendmessage?text=".$message."&chat_id=".$user);
-						        	}	
-							}
-
-						}
-						
-					}
+			foreach ($dsn_npp as $key => $n) {
+				# code...
+				$ini_npp = $n['npp'];
+			}
+			// var_dump($ini_npp);
+			if($time_try <= $jam_acuan){
+				$message = "Ada Jadwal pada ".$detail." dengan Mata Kuliah ".$course;
+				$q = mysqli_query($con,"select * from user where nim='$ini_npp'");
+				foreach ($q as $dosen) {
+				   		$user = $dosen['id_user'];
+						$urls = "http://api.telegram.org/bot648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8/sendmessage?text=".urlencode($message)."&chat_id=".$user;		        	
+							        		file_get_contents($urls);
 				}
-		}
+			}
 
+		}
+	}
+	echo "Program sedang berjalan...\n";
 	while (true) {
 	    notifikasi_dsn();
-	    sleep(1800);
+	    sleep(5);
 	}
 ?>
