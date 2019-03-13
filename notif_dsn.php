@@ -83,6 +83,6 @@
 	echo "Program sedang berjalan...\n";
 	while (true) {
 	    notifikasi_dsn();
-	    sleep(5);
+	    sleep(1800);
 	}
 ?>
