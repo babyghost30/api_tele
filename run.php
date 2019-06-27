@@ -1,4 +1,5 @@
 <?php
+	error_reporting(0);
 	$token = "648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8";
 	define('BOT_TOKEN', $token);
 
@@ -146,7 +147,7 @@
         $idchat = $sumber['chat']['id'];
 
         $namamu = $sumber['from']['first_name'];
-        $namabkg = $sumber['from']['last_name'];
+        // $namabkg = $sumber['from']['last_name'];
         $iduser = $sumber['from']['id'];
 
       //   $q = mysqli_query($con,"select * from user where id_user='$user'");
@@ -183,13 +184,13 @@
 	            $katapertama = strtolower($pecah[0]);
 	switch ($katapertama) {
 	        case '/start':
-	          $text = "Hai '$namamu $namabkg' Selamat datang di Siadin Bot untuk bantuan silahkan ketik:/help\n";
+	          $text = "Hai '$namamu' Selamat datang di Siadin Bot untuk bantuan silahkan ketik:/help\n";
 	          $text .= '🎓 Sistem Akademik Universitas Dian Nuswantoro ver.`'.myVERSI."`\n";
 	          $text .= "🎓 By UPT. Data & Informasi UDINUS\n\n";
 	          break;
 
 	        case '/help':
-	          $text = "🎓 Sistem Akademik Universitas Dian Nuswantoro\n";
+	          $text  = "🎓 Sistem Akademik Universitas Dian Nuswantoro\n";
 	          $text .= "🎓 By UPT. Data & Informasi UDINUS\n\n";
 	          $text .= "Daftar menu yang bisa di gunakan\n\n";
 	          $text .= "🎓 /reg untuk register account baru format:/reg A11.2018.XXXXX Password\n";
@@ -217,7 +218,8 @@
 																 )
 														 )
 								 				);
-				if($cek_status == null){
+				if($cek_status == null)
+					{
 					$cek_npp = $models->execute_kw($database,
 												   $uid,
 												   $password,
@@ -348,12 +350,13 @@
 						}
 						$text = "JADWAL KULIAH ANDA :\n\n";
 						for ($i=0; $i < count($cur); $i++) { 
+							$dosen_name = explode("(", $cur[$i]["krm_id"][1]);
 							$time = $cur[$i]['hour_start'];
 							$hourFraction = $time - (int)$time;
 							$minutes = $hourFraction * 60;
 							$hours = (int)$time;
 							$menit = (int)$minutes;
-							$text .= "Nama          : ".$cur[$i]['matakuliah']."\nJam Mulai   : ".$hours . ':' . $menit."\nRuang          : ".$cur[$i]['room_id'][1]."\n--------------------------------------------------------------------------------\n";
+							$text .= "Nama                         : ".$cur[$i]['matakuliah']."\nJam Mulai & Ruang : ".$cur[$i]['display_name']."\nPresensi                    : ".$study_plan_id[$i]['presence_percentage']."%\nDosen                        : ".$dosen_name[0]."\n--------------------------------------------------------------------------------\n";
 						}
 					}
 				}				
@@ -420,8 +423,6 @@
 	    return $last_id;
 	}
 
-// AKTIFKAN INI jika menggunakan metode poll
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	$last_id = null;
 	while (true) {
 	    $result = getUpdates($last_id);
