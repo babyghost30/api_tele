@@ -1,10 +1,6 @@
 <?php
 	function notif_mhs()
 	{
-		$token = "648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8";
-		$urls = "https://api.telegram.org/bot".$token;
-		$update = json_decode(file_get_contents('php://input') ,true);
-
 		require 'conf/conn.php';
 		include "conf/odoo_conf.php";
 
@@ -25,7 +21,7 @@
 			$jam = date_add($hari, date_interval_create_from_date_string('30 minutes'));
 			$jam_acuan = date_format($jam, 'H:i');
 
-		$q = mysqli_query($con, "select * from user where nim LIKE 'A%' or nim LIKE 'B%' or nim LIKE 'D%'");
+		$q = mysqli_query($con, "select * from user where nim LIKE 'A%' or nim LIKE 'B%' or nim LIKE 'D%' or nim LIKE 'C%' or nim LIKE 'E%'");
 			foreach ($q as $mhs) {
 				# code...
 				$nim = $mhs['nim'];
@@ -119,7 +115,7 @@
 								$menit = (int)$minutes;
 								$time_course = $hours.":".$menit;
 								$time_try = $time_course;
-								if(($day == $day_target) && ($time_try == $date)){
+								if(($day == $day_target) && ($time_try <= $jam_acuan)){
 										if($day == 1){
 											$day = 'Senin';
 										}elseif ($day == 2) {
@@ -134,19 +130,30 @@
 											$day = 'Sabtu';
 										}else $day = 'minggu';
 											
-										$message = "Ada Jadwal pada hari ".$day." dengan Mata Kuliah ".$course." di ruang ".$room;
+										$message = "Ada Jadwal pada hari ".$day." dengan Mata Kuliah ".$course." di ruang ".$room."dan Dosen ".$schedule['krm_id'][1];
 										$q = mysqli_query($con,"select * from user where nim='$nim_mhs'");
 							        	foreach ($q as $mhs) {
+							        		// $token = "648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8";
 							        		$user = $mhs['id_user'];
-							        		file_get_contents($urls."/sendmessage?text=".$message."&chat_id=".$user);
+											$urls = "http://api.telegram.org/bot648740217:AAEf2YTL-rVWtmydikSYnbwric2gdOBUIo8/sendmessage?text=".urlencode($message)."&chat_id=".$user;		        	
+							        		file_get_contents($urls);
 							        	}	
 								}
 							}
 						}
 			}
 	}
+	echo "========================================\n";
+	echo "+                                      +\n";
+	echo "+    Nama File : Notifikasi Mahasiswa  +\n";
+	echo "+    Versi     : 0.0.1                 +\n";
+	echo "+                                      +\n";
+	echo "========================================\n";
+	echo "Program sedang berjalan...\n";
+	
 	while (true) {
 	    notif_mhs();
-	    sleep(1800);
+	    // echo "-";
+	    sleep(30);
 	}
 ?>
