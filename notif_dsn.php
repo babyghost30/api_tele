@@ -80,9 +80,16 @@
 
 		}
 	}
+	echo "========================================\n";
+	echo "+                                      +\n";
+	echo "+    Nama File : Notifikasi Dosen      +\n";
+	echo "+    Versi     : 0.0.1                 +\n";
+	echo "+                                      +\n";
+	echo "========================================\n";
+
 	echo "Program sedang berjalan...\n";
 	while (true) {
 	    notifikasi_dsn();
-	    sleep(1800);
+	    sleep(30);
 	}
 ?>
